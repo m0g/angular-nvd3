@@ -1,5 +1,5 @@
 /**************************************************************************
-* AngularJS-nvD3, v0.1.0; MIT License; 10/06/2014 17:12
+* AngularJS-nvD3, v0.1.0; MIT License; 02/04/2015 17:09
 * http://krispo.github.io/angular-nvd3
 **************************************************************************/
 (function(){
@@ -30,12 +30,6 @@
                         refresh: function(){
                             scope.api.updateWithOptions(scope.options);
                         },
-
-                        // Update chart layout (for example if container is resized)
-                        update: function() {
-                            scope.chart.update();
-                        },
-
                         // Update chart with new options
                         updateWithOptions: function(options){
                             // Clearing
@@ -110,7 +104,7 @@
                                         || (key === 'xScale' && options.chart.type === 'scatterChart')
                                         || (key === 'yScale' && options.chart.type === 'scatterChart')
                                         || (key === 'x' && (options.chart.type === 'lineWithFocusChart' || options.chart.type === 'multiChart'))
-                                        || (key === 'y' && (options.chart.type === 'lineWithFocusChart' || options.chart.type === 'multiChart'))
+                                        || (key === 'y' && options.chart.type === 'lineWithFocusChart' || options.chart.type === 'multiChart')
                                     );
 
                                 else if (options.chart[key] === undefined || options.chart[key] === null){
@@ -143,6 +137,10 @@
                         updateWithData: function (data){
                             if (data) {
                                 scope.options.chart['transitionDuration'] = +scope.options.chart['transitionDuration'] || 250;
+
+                                if (scope.options.chart['colors'])
+                                  scope.chart.color(scope.options.chart['colors']);
+
                                 // remove whole svg element with old data
                                 d3.select(element[0]).select('svg').remove();
 
@@ -168,10 +166,7 @@
                             element.find('.caption').remove();
                             element.empty();
                             scope.chart = null;
-                        },
-
-                        // Get full directive scope
-                        getScope: function(){ return scope; }
+                        }
                     };
 
                     // Configure the chart model with the passed options
@@ -311,27 +306,18 @@
                         return dst;
                     }
 
-                    /* Event Handling */
-                    // Watching on options changing
-                    scope.$watch('options', function(newOptions){
+                    // Watching on options, data, config changing
+                    scope.$watch('options', function(options){
                         if (!scope._config.disabled && scope._config.autorefresh) scope.api.refresh();
                     }, true);
-
-                    // Watching on data changing
-                    scope.$watch('data', function(newData, oldData){
-                        if (newData !== oldData){
-                            if (!scope._config.disabled && scope._config.autorefresh) {
-                                scope._config.refreshDataOnly ? scope.chart.update() : scope.api.refresh(); // if wanted to refresh data only, use chart.update method, otherwise use full refresh.
-                            }
+                    scope.$watch('data', function(data){
+                        if (!scope._config.disabled && scope._config.autorefresh) {
+                            scope._config.refreshDataOnly ? scope.chart.update() : scope.api.refresh(); // if wanted to refresh data only, use chart.update method, otherwise use full refresh.
                         }
                     }, true);
-
-                    // Watching on config changing
-                    scope.$watch('config', function(newConfig, oldConfig){
-                        if (newConfig !== oldConfig){
-                            scope._config = angular.extend(defaultConfig, newConfig);
-                            scope.api.refresh();
-                        }
+                    scope.$watch('config', function(config){
+                        scope._config = angular.extend(defaultConfig, config);
+                        scope.api.refresh();
                     }, true);
 
                     //subscribe on global events
