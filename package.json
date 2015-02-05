@@ -6,7 +6,7 @@
     "homepage": "http://krispo.github.io/angular-nvd3",
     "repository": {
         "type": "git",
-        "url": "https://github.com/krispo/angular-nvd3.git"
+        "url": "https://github.com/m0g/angular-nvd3.git"
     },
     "main": "dist/angular-nvd3.js",
     "keywords": [
